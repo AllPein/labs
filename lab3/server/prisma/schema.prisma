@@ -19,3 +19,7 @@ model User {
   password String
 }
 
+model VideoTranscodingTask {
+  id     Int    @id @default(autoincrement())
+  status String @default("pending") // pending, processing, completed, failed
+}

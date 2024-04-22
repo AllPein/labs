@@ -14,7 +14,7 @@ function ConvertVideo() {
     setFile(file);
     const formData = new FormData();
     formData.append('file', file);
-    await fetch('http://localhost:3000/upload', {
+    await fetch('http://localhost:3000/video/upload', {
       method: 'POST',
       body: formData,
     });

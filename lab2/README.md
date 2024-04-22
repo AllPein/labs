@@ -13,12 +13,12 @@
 
 Для фронта использовался [React](https://react.dev/)
 
-Для сервера [rust](https://www.rust-lang.org/) + [actix_web](https://actix.rs/) в качестве веб фреймворка
+Для сервера node.js + nest.js + prisma
 
 База данных - sqlite
 
 ### Getting Started
-Для локального запуска клиента необходимо установить [rust](https://www.rust-lang.org/) и [node](https://nodejs.org/en)
+Для локального запуска клиента необходимо установить [node](https://nodejs.org/en) версии 18 и выше
 
 > Я использую pnpm для управлением зависимостями
 
@@ -28,27 +28,15 @@ cd client
 npm install
 npm run dev
 ```
-сайт запущен на http://locahost:5137/
+сайт запущен на http://locahost:5173/
 
 #### Server
 ```bash
 cd server
-cargo run
+npm install
+npx prisma migrate dev --name init
+npm run start
 ```
 
 ### Auth
-В проекте используется session-based авторизация
-
-### Testing
-В качестве чекера написал юнит тесты для сервера
-
-Для проверки
-
-```bash
-cd server
-cargo test
-// Все тесты пройдены :)
-```
-
-### Docker
-В корне лежит `docker-compose.yml` для запуска клиента и сервера
+В проекте используется jwt авторизация
