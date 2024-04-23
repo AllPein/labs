@@ -37,9 +37,7 @@ npm run dev
 #### Server
 ```bash
 cd server
-npm install
-npx prisma migrate dev --name init
-npm run start
+docker compose up -d
 ```
 
 сервер запущен на http://locahost:3000
