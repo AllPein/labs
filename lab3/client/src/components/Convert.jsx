@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useNavigate } from 'react-router';
+import { io } from "socket.io-client";
 
 function ConvertVideo() {
   const dropzoneRef = useRef(null);
-  const [file, setFile] = useState(null);
+  const [, setFile] = useState(null);
   const [status, setStatus] = useState('');
   const [downloadLink, setDownloadLink] = useState('');
   const navigate = useNavigate()
@@ -42,21 +43,24 @@ function ConvertVideo() {
 
 
   useEffect(() => {
-    if (file) {
-      const es = new EventSource(
-        `http://localhost:3000/events`
-      );
-      es.onopen = () => console.log('>>> Connection opened!');
-      es.onerror = (e) => console.log('ERROR!', e);
-      es.onmessage = (e) => {
-        const data = JSON.parse(e.data);
-        console.log(data);
-        setStatus(data.status.toLowerCase());
-        setDownloadLink(data['download_link']);
-      };
-      return () => es.close();
-    }
-  }, [file]);
+    const socket = io(
+        `http://localhost:3001`
+    );
+    socket.on('connect', () => {
+        console.log('Connected to WebSocket server!');
+    });
+
+    socket.on('status', (data) => {
+        setStatus(data.status)
+        if (data.status === 'completed') {
+            setDownloadLink(data.url);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Disconnected from WebSocket server');
+    });
+  }, []);
 
   return (
     <>
@@ -64,7 +68,7 @@ function ConvertVideo() {
       <h1 className="mb-4 text-4xl font-extrabold tracking-tight leading-none text-gray-900 md:text-5xl lg:text-6xl dark:text-white">Convert mp4 to webm</h1>
 
       <div className=" flex flex-col mb-8 lg:mb-16 space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4"></div>
-      {(status === 'started' && (
+      {(status === 'processing' && (
         <div className=' h-64 bg-gray-50 rounded-lg dark:bg-gray-700 w-3/5 min-w-[300px] min-h-[240px] py-4 px-4 flex flex-col items-center justify-center mx-auto'>
           <div className="px-3 py-3 text-xs font-medium leading-none text-center text-blue-800 bg-blue-200 rounded-full animate-pulse dark:bg-blue-900 dark:text-blue-200">Processing your video...</div>
 
@@ -78,13 +82,12 @@ function ConvertVideo() {
               <span className="sr-only">Success</span>
             </div>
             <p className="mb-8 text-lg font-semibold text-gray-900 dark:text-white">Video converted</p>
-            <a href={downloadLink} target="_blank" download='result.webm' type="button" className="py-2 px-3 text-sm font-medium text-center text-white rounded-lg bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:focus:ring-primary-900">
+            <a href={downloadLink} download='asd' className="py-2 px-3 text-sm font-medium text-center text-white rounded-lg bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:focus:ring-primary-900">
               Download
             </a>
           </div>
         )) ||
         (status === '' && (
-
           <div
             data-testid='dropzone'
             {...getRootProps({

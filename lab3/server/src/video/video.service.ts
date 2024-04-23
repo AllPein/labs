@@ -4,6 +4,8 @@ import { promisify } from 'util';
 import * as ffmpeg from 'ffmpeg-static';
 import { PrismaService } from 'src/prisma/prisma.service';
 
+const baseUrl = 'http://localhost:3000';
+
 @Injectable()
 export class VideoService {
   constructor(private prisma: PrismaService) {}
@@ -17,13 +19,16 @@ export class VideoService {
   }
 
   async transcodeVideo(filePath: string, taskId: number): Promise<string> {
-    const outputPath = filePath.replace(/\.\w+$/, '.mp4');
-    const command = `${ffmpeg} -i ${filePath} ${outputPath}`;
+    const outputFilename = filePath
+      .replace(/^.*[\\\/]/, '')
+      .replace(/\.\w+$/, '.mp4');
+    const outputPath = `./uploads/${outputFilename}`;
+    const command = `${ffmpeg} -i ${filePath} -c:v libx264 -preset fast -c:a aac ${outputPath}`;
 
     try {
       await promisify(exec)(command);
       await this.updateTaskStatus(taskId, 'completed');
-      return outputPath;
+      return baseUrl + '/download/' + outputFilename;
     } catch (error) {
       await this.updateTaskStatus(taskId, 'failed');
       throw new Error('Failed to transcode video.');

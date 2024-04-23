@@ -20,15 +20,13 @@
 ### Getting Started
 Для локального запуска клиента необходимо установить [node](https://nodejs.org/en) версии 18 и выше
 
-> Я использую pnpm для управлением зависимостями
-
 #### Frontend
 ```bash
 cd client
 npm install
 npm run dev
 ```
-сайт запущен на http://locahost:5173/
+сайт запущен на http://locahost:5173
 
 #### Server
 ```bash
@@ -37,6 +35,7 @@ npm install
 npx prisma migrate dev --name init
 npm run start
 ```
+сервер запущен на http://locahost:3000
 
 ### Auth
 В проекте используется jwt авторизация

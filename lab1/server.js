@@ -1,8 +1,8 @@
 const net = require('net');
 
-const db = {};
+let db = {};
 
-async function handleCommand(input, socket) {
+function handleCommand(input, socket) {
     const parts = input.trim().split(' ');
     const command = parts[0];
     const args = parts.slice(1);
@@ -48,3 +48,6 @@ const server = net.createServer((socket) => {
 server.listen(6379, '0.0.0.0', () => {
     console.log('Server is running on port 6379');
 });
+
+exports.handleCommand = handleCommand;
+exports.db = db;

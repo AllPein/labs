@@ -1,15 +1,16 @@
 import {
   Controller,
   Post,
-  UploadedFile,
   UseInterceptors,
+  UploadedFile,
   Res,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { VideoService } from './video.service';
-import { Response } from 'express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { SocketGateway } from './socket.gateaway';
 
 @Controller('video')
@@ -20,8 +21,18 @@ export class VideoController {
   ) {}
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
-  async handleFileUpload(@UploadedFile() file: any, @Res() res: Response) {
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, callback) => {
+          const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          callback(null, `${uniqueName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  async handleFileUpload(@UploadedFile() file: any, @Res() res) {
     if (!file)
       throw new HttpException('No file provided', HttpStatus.BAD_REQUEST);
 
@@ -41,7 +52,10 @@ export class VideoController {
         status: 'completed',
         url: outputPath,
       });
-      res.json({ message: 'Video successfully transcoded', url: outputPath });
+      res.json({
+        message: 'Video successfully transcoded',
+        url: `/download/${outputPath}`,
+      });
     } catch (error) {
       this.socketGateway.notifyClients('status', {
         taskId: task.id,
